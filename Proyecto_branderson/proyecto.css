@@ -1,0 +1,59 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+
+}
+
+h1{
+    font-size: 5rem;
+    display: flex;
+    justify-content: center;
+    align-items:center;
+    margin-top: 40vh;
+    padding-bottom: 2rem;
+}
+
+div{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+button{
+    border: none; 
+    color: white; 
+    padding: 14px 28px; 
+    cursor: pointer; 
+    border-radius: 5px;
+        color: black;
+        float: left;   
+        text-decoration: none;
+}
+
+#contenedorClima {
+    
+    background-color: white;
+    flex-direction: column;
+    gap: 2rem;
+    border-radius: 5%;
+    width: 300px;
+    margin: 20px auto;
+    text-align: center;
+    border: 5px;
+  
+}
+
+
+
+body{
+
+    background-image: url(Diseño\ sin\ título.gif);
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-attachment: fixed;
+
+
+}
+
