@@ -1,0 +1,86 @@
+:root {
+  --color-primary: #4caf50;
+  --color-primary-hover: #45a049;
+  --color-text: #333;
+  --color-loader: #3498db;
+  --color-background: #f5f5f5;
+  --color-error: #d32f2f;
+  --color-error-bg: #ffebee;
+}
+
+.container {
+  max-width: 600px;
+  margin: 50px auto;
+  padding: 20px;
+  text-align: center;
+  font-family: Arial, sans-serif;
+}
+
+button {
+  padding: 15px 30px;
+  margin: 20px 0;
+  font-size: 18px;
+  color: white;
+  background-color: var(--color-primary);
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: var(--color-primary-hover);
+}
+
+button:focus {
+  outline: 3px solid var(--color-loader);
+  outline-offset: 2px;
+}
+
+.loader {
+  width: 50px;
+  height: 50px;
+  margin: 20px auto;
+  border: 5px solid #f3f3f3;
+  border-top: 5px solid var(--color-loader);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+#weatherMessage {
+  font-size: 24px;
+  margin-top: 20px;
+  line-height: 1.5;
+  color: var(--color-text);
+}
+
+.hidden {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .container {
+    max-width: 100%;
+    margin: 20px auto;
+    padding: 10px;
+  }
+
+  button {
+    width: 100%;
+    padding: 12px 20px;
+    font-size: 16px;
+  }
+
+  #weatherMessage {
+    font-size: 20px;
+  }
+}
