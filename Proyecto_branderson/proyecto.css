@@ -18,6 +18,7 @@ div{
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-direction: column;
 }
 
 button{
@@ -34,15 +35,48 @@ button{
 #contenedorClima {
     
     background-color: white;
-    flex-direction: column;
-    gap: 2rem;
+    display: grid; 
+    grid-template-columns: repeat(2, 1fr); 
+    gap: 1rem; 
     border-radius: 5%;
-    width: 300px;
+    width: 90%; 
+    max-width: 600px; 
     margin: 20px auto;
+    padding: 1rem;
     text-align: center;
-    border: 5px;
   
 }
+
+.cuadro {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    padding: 10px;
+    gap: 1rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.cuadro img {
+    width: 40px;
+    height: 40px;
+}
+
+.cuadro p {
+    margin: 0;
+    font-size: 1rem;
+    color: #333;
+}
+
+
+#buscador{
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    justify-items: center;
+}
+
 
 
 
