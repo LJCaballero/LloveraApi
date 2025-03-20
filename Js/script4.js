@@ -198,3 +198,84 @@ function regresar() {
     limpiarInformacion();
     document.getElementById("ubicacion").value = "";
 }
+
+
+// Declarar el array para almacenar las ciudades favoritas
+let ciudadesFavoritas = [];
+
+// Función para agregar una ciudad a la lista de favoritas
+function agregarCiudadFavorita(ciudad) {
+    if (!ciudadesFavoritas.includes(ciudad)) {
+        ciudadesFavoritas.push(ciudad);
+        mostrarCiudadesFavoritas();
+    } else {
+        alert("Esta ciudad ya está en tu lista de favoritas.");
+    }
+}
+
+// Función para mostrar las ciudades favoritas
+function mostrarCiudadesFavoritas() {
+    const listaFavoritas = document.getElementById("listaFavoritos");
+    listaFavoritas.innerHTML = "";
+
+    ciudadesFavoritas.forEach(ciudad => {
+        let li = document.createElement("li");
+        li.textContent = ciudad;
+
+        // Botón para eliminar la ciudad de favoritas
+        let botonEliminar = document.createElement("button");
+        botonEliminar.textContent = "Eliminar";
+        botonEliminar.onclick = () => eliminarCiudadFavorita(ciudad);
+
+        li.appendChild(botonEliminar);
+        listaFavoritas.appendChild(li);
+    });
+}
+
+// Función para eliminar una ciudad de la lista de favoritas
+function eliminarCiudadFavorita(ciudad) {
+    ciudadesFavoritas = ciudadesFavoritas.filter(fav => fav !== ciudad);
+    mostrarCiudadesFavoritas();
+}
+
+// Modificar la función obtenerDatos para incluir el botón de agregar a favoritas
+async function obtenerDatos(url) {
+    try {
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error(`HTTP Error: ${response.status} ${response.statusText}`);
+        }
+        const data = await response.json();
+
+        if (data.cod !== "200") {
+            alert("Ubicación no encontrada. Intenta otra ciudad.");
+            return;
+        }
+
+        mostrarPronostico(data.list);
+        mostrarPronosticoLargoPlazo(data.list);
+
+        recomendacionesRopa(data.list[0].main.temp);
+        cambiarFondo(data.list[0].weather[0].main, data.list[0].main.temp);
+
+        if (busquedasRecientes.length >= 5) {
+            busquedasRecientes.pop();
+        }
+        busquedasRecientes.unshift(data.city.name);
+        mostrarBusquedaReciente();
+
+        if (data.city && data.city.country) {
+            document.getElementById("ubicacionActual").textContent = `${data.city.name}, ${data.city.country}`;
+        }
+
+        // Agregar botón para añadir a favoritas
+        const botonFavorito = document.createElement("button");
+        botonFavorito.textContent = "Agregar a Favoritas";
+        botonFavorito.onclick = () => agregarCiudadFavorita(data.city.name);
+        document.getElementById("ubicacionActual").appendChild(botonFavorito);
+
+    } catch (error) {
+        console.error("Error al obtener los datos: ", error);
+        alert("Error al obtener datos. Revisa tu conexión.");
+    }
+}
