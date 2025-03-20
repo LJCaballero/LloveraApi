@@ -278,3 +278,52 @@ async function obtenerDatos(url) {
         alert("Error al obtener datos. Revisa tu conexión.");
     }
 }
+
+// Mostrar las últimas 5 búsquedas
+function mostrarBusquedaReciente() {
+    const listaBusqueda = document.getElementById("listaBusqueda");
+    listaBusqueda.innerHTML = "";
+
+    busquedasRecientes.forEach(busqueda => {
+        let li = document.createElement("li");
+        li.textContent = busqueda;
+
+        // Hacer el elemento pulsable
+        li.style.cursor = "pointer";
+        li.onclick = () => {
+            document.getElementById("ubicacion").value = busqueda; // Establecer la ubicación seleccionada
+            verificarClima(); // Realizar la búsqueda
+        };
+
+        listaBusqueda.appendChild(li);
+    });
+}
+
+// Función para mostrar las ciudades favoritas
+function mostrarCiudadesFavoritas() {
+    const listaFavoritas = document.getElementById("listaFavoritos");
+    listaFavoritas.innerHTML = "";
+
+    ciudadesFavoritas.forEach(ciudad => {
+        let li = document.createElement("li");
+        li.textContent = ciudad;
+
+        // Hacer el elemento pulsable
+        li.style.cursor = "pointer";
+        li.onclick = () => {
+            document.getElementById("ubicacion").value = ciudad; // Establecer la ubicación seleccionada
+            verificarClima(); // Realizar la búsqueda
+        };
+
+        // Botón para eliminar la ciudad de favoritas
+        let botonEliminar = document.createElement("button");
+        botonEliminar.textContent = "Eliminar";
+        botonEliminar.onclick = (event) => {
+            event.stopPropagation(); // Evitar que el clic en el botón dispare la búsqueda
+            eliminarCiudadFavorita(ciudad);
+        };
+
+        li.appendChild(botonEliminar);
+        listaFavoritas.appendChild(li);
+    });
+}
