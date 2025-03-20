@@ -52,19 +52,17 @@ async function obtenerDatos(url) {
         }
 
         mostrarPronostico(data.list);
-        mostrarPronosticoLargoPlazo(data.list); // 🔥 Corregido: Se agregó esta función
+        mostrarPronosticoLargoPlazo(data.list);
 
-        // 🔥 Llamar a la función de recomendaciones de ropa
         recomendacionesRopa(data.list[0].main.temp);
 
-        // 🔥 Llamar a la función de cambio de fondo
         cambiarFondo(data.list[0].weather[0].main, data.list[0].main.temp);
 
-        // Guardar búsqueda en el historial de las últimas 5 búsquedas
+        
         if (busquedasRecientes.length >= 5) {
-            busquedasRecientes.pop(); // Eliminar el más antiguo si hay más de 5 búsquedas
+            busquedasRecientes.pop(); //
         }
-        busquedasRecientes.unshift(data.city.name); // Agregar la nueva búsqueda al principio
+        busquedasRecientes.unshift(data.city.name); 
 
         mostrarBusquedaReciente();
 
@@ -82,11 +80,11 @@ async function obtenerDatos(url) {
 function cambiarFondo(clima, temp) {
     let fondo = "";
 
-    // Si la temperatura es alta, priorizar el fondo de playa
+
     if (temp >= 30) {
-        fondo = "assets/diaPlaya.gif"; // GIF de día de playa para calor extremo
+        fondo = "assets/diaPlaya.gif"; 
     } else if (clima === "Snow" || temp < 0) {
-        fondo = "assets/nieve.gif"; // GIF de nieve para frío extremo
+        fondo = "assets/nieve.gif"; 
     } else {
         switch (clima) {
             case "Rain":
@@ -131,7 +129,6 @@ function mostrarPronostico(lista) {
     });
 }
 
-// ✅ Se agregó la función que faltaba para mostrar el pronóstico a largo plazo
 function mostrarPronosticoLargoPlazo(lista) {
     const tablaLargoPlazo = document.querySelector("#tablaPronosticoLargoPlazo tbody");
     tablaLargoPlazo.innerHTML = "";
