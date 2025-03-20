@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pronóstico del Clima</title>
+    <link rel="stylesheet" href="Css/style4.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Pronóstico del Clima</h1>
+        <div>
+            <input type="text" id="ubicacion" placeholder="Ingresa una ciudad o país">
+            <button id="comprobarBtn">Comprobar Clima</button>
+        </div>
+        <div id="ubicacionActual">Ubicación Actual: --</div>
+        <div id="ropaRecomendada">Por favor, ingresa una ubicación para ver las recomendaciones de ropa.</div>
+        <div id="tabla-container">
+            <table id="tablaClima">
+                <thead>
+                    <tr>
+                        <th>Hora</th>
+                        <th>Clima</th>
+                        <th>Temp</th>
+                        <th>Sensación Térmica</th>
+                        <th>Humedad</th>
+                        <th>Viento</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+            <table id="tablaPronosticoLargoPlazo">
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Clima</th>
+                        <th>Max Temp</th>
+                        <th>Min Temp</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+        <div id="busquedasRecientes">
+            <h2>Últimas 5 búsquedas</h2>
+            <ul id="listaBusqueda"></ul>
+        </div>
+        <button id="regresarBtn">Regresar</button>
+    </div>
+    <div id="busquedasRecientes">
+        <h3>Últimas Búsquedas</h3>
+        <ul id="listaBusqueda"></ul>
+    </div>
+    <script src="Js/script4.js"></script>
+</body>
+</html>

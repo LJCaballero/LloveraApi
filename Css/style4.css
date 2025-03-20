@@ -1,0 +1,118 @@
+/* Estilos generales */
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    color: white;
+    background-image: url('assets/dInicio.gif');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    margin: 0;
+    padding: 0;
+}
+
+/* Contenedor principal */
+.container {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.7); /* Fondo semi-transparente */
+    border-radius: 10px;
+}
+
+/* Campos de entrada y botones */
+input, button {
+    font-size: 1rem;
+    padding: 10px;
+    margin: 10px;
+    border-radius: 5px;
+    border: none;
+}
+
+button {
+    background-color: #ff9800;
+    color: white;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #e68900;
+}
+
+/* Tablas de pronóstico */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+th, td {
+    padding: 10px;
+    border: 1px solid white;
+    text-align: center;
+}
+
+th {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Listado de últimas búsquedas */
+#listaBusqueda {
+    list-style: none;
+    padding: 0;
+}
+
+#listaBusqueda li {
+    background-color: rgba(255, 255, 255, 0.3);
+    padding: 8px;
+    margin: 5px 0;
+    border-radius: 5px;
+}
+
+/* Estilos para imágenes dentro de la tabla */
+img {
+    max-width: 50px;
+    height: auto;
+}
+
+/* 🔹 Responsividad para pantallas pequeñas */
+@media (max-width: 768px) {
+    .container {
+        max-width: 90%;
+        padding: 15px;
+    }
+
+    input, button {
+        width: 100%;
+        font-size: 1rem;
+    }
+
+    table {
+        font-size: 0.9rem;
+    }
+
+    img {
+        max-width: 40px;
+    }
+}
+
+/* 🔹 Responsividad para teléfonos pequeños */
+@media (max-width: 480px) {
+    body {
+        font-size: 14px;
+    }
+
+    .container {
+        max-width: 95%;
+        padding: 10px;
+    }
+
+    th, td {
+        padding: 6px;
+        font-size: 0.8rem;
+    }
+
+    img {
+        max-width: 30px;
+    }
+}
