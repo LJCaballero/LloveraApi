@@ -1,329 +1,279 @@
-'use strict';
+"use strict";
 
-document.getElementById("comprobarBtn").addEventListener("click", verificarClima);
+document
+  .getElementById("comprobarBtn")
+  .addEventListener("click", verificarClima);
 document.getElementById("regresarBtn").addEventListener("click", regresar);
 
-let busquedasRecientes = [];
 
-// 🌟 Establecer fondo predeterminado al cargar la página
+let busquedasRecientes =
+  JSON.parse(localStorage.getItem("busquedasRecientes")) || [];
+let ciudadesFavoritas =
+  JSON.parse(localStorage.getItem("ciudadesFavoritas")) || [];
+
+
 window.onload = function () {
-    document.body.style.backgroundImage = "url('assets/dInicio.gif')";
-    document.body.style.backgroundSize = "cover";
-    document.body.style.backgroundPosition = "center";
-    document.body.style.backgroundRepeat = "no-repeat";
+  document.body.style.backgroundImage = "url('assets/dInicio.gif')";
+  document.body.style.backgroundSize = "cover";
+  document.body.style.backgroundPosition = "center";
+  document.body.style.backgroundRepeat = "no-repeat";
+
+  
+  mostrarBusquedaReciente();
+  mostrarCiudadesFavoritas();
 };
 
+function guardarEnLocalStorage() {
+  localStorage.setItem(
+    "busquedasRecientes",
+    JSON.stringify(busquedasRecientes)
+  );
+  localStorage.setItem("ciudadesFavoritas", JSON.stringify(ciudadesFavoritas));
+}
+
 async function verificarClima() {
-    let ubicacion = document.getElementById("ubicacion").value.trim();
-    let apiKey = "b561a804ec29f4d040853418daaf03eb";
-    let url;
+  let ubicacion = document.getElementById("ubicacion").value.trim();
+  let apiKey = "b561a804ec29f4d040853418daaf03eb";
+  let url;
 
-    limpiarInformacion();
+  limpiarInformacion();
 
-    if (ubicacion) {
-        url = `https://api.openweathermap.org/data/2.5/forecast?q=${ubicacion}&appid=${apiKey}&units=metric&lang=es`;
-    } else {
-        if (!navigator.geolocation) {
-            alert("Geolocalización no soportada.");
-            return;
-        }
-        navigator.geolocation.getCurrentPosition(async position => {
-            const lat = position.coords.latitude;
-            const lon = position.coords.longitude;
-            url = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric&lang=es`;
-            await obtenerDatos(url);
-        });
-        return;
+  if (ubicacion) {
+    url = `https://api.openweathermap.org/data/2.5/forecast?q=${ubicacion}&appid=${apiKey}&units=metric&lang=es`;
+  } else {
+    if (!navigator.geolocation) {
+      alert("Geolocalización no soportada.");
+      return;
     }
-    await obtenerDatos(url);
+    navigator.geolocation.getCurrentPosition(async (position) => {
+      const lat = position.coords.latitude;
+      const lon = position.coords.longitude;
+      url = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric&lang=es`;
+      await obtenerDatos(url);
+    });
+    return;
+  }
+  await obtenerDatos(url);
 }
 
 async function obtenerDatos(url) {
-    try {
-        const response = await fetch(url);
-        if (!response.ok) {
-            throw new Error(`HTTP Error: ${response.status} ${response.statusText}`);
-        }
-        const data = await response.json();
-
-        if (data.cod !== "200") {
-            alert("Ubicación no encontrada. Intenta otra ciudad.");
-            return;
-        }
-
-        mostrarPronostico(data.list);
-        mostrarPronosticoLargoPlazo(data.list); // 🔥 Corregido: Se agregó esta función
-
-        // 🔥 Llamar a la función de recomendaciones de ropa
-        recomendacionesRopa(data.list[0].main.temp);
-
-        // 🔥 Llamar a la función de cambio de fondo
-        cambiarFondo(data.list[0].weather[0].main, data.list[0].main.temp);
-
-        // Guardar búsqueda en el historial de las últimas 5 búsquedas
-        if (busquedasRecientes.length >= 5) {
-            busquedasRecientes.pop(); // Eliminar el más antiguo si hay más de 5 búsquedas
-        }
-        busquedasRecientes.unshift(data.city.name); // Agregar la nueva búsqueda al principio
-
-        mostrarBusquedaReciente();
-
-        if (data.city && data.city.country) {
-            document.getElementById("ubicacionActual").textContent = `${data.city.name}, ${data.city.country}`;
-        }
-
-    } catch (error) {
-        console.error("Error al obtener los datos: ", error);
-        alert("Error al obtener datos. Revisa tu conexión.");
+  try {
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`HTTP Error: ${response.status} ${response.statusText}`);
     }
+    const data = await response.json();
+
+    if (data.cod !== "200") {
+      alert("Ubicación no encontrada. Intenta otra ciudad.");
+      return;
+    }
+
+    mostrarPronostico(data.list);
+    mostrarPronosticoLargoPlazo(data.list);
+    recomendacionesRopa(data.list[0].main.temp);
+    cambiarFondo(data.list[0].weather[0].main, data.list[0].main.temp);
+
+    if (data.city && data.city.name) {
+      if (busquedasRecientes.length >= 5) {
+        busquedasRecientes.pop();
+      }
+      if (!busquedasRecientes.includes(data.city.name)) {
+        busquedasRecientes.unshift(data.city.name);
+        guardarEnLocalStorage();
+        mostrarBusquedaReciente();
+      }
+    }
+
+    if (data.city && data.city.country) {
+      const ubicacionActual = document.getElementById("ubicacionActual");
+      ubicacionActual.innerHTML = `${data.city.name}, ${data.city.country}`;
+
+      const botonFavorito = document.createElement("button");
+      botonFavorito.className = "favorite-btn";
+      botonFavorito.textContent = ciudadesFavoritas.includes(data.city.name)
+        ? "★ Favorito"
+        : "☆ Agregar a Favoritos";
+      botonFavorito.onclick = () => toggleFavorito(data.city.name);
+      ubicacionActual.appendChild(botonFavorito);
+    }
+  } catch (error) {
+    console.error("Error al obtener los datos: ", error);
+    alert("Error al obtener datos. Revisa tu conexión.");
+  }
 }
 
-// ✅ Función para cambiar el fondo dinámicamente según el clima y la temperatura
+function toggleFavorito(ciudad) {
+  const index = ciudadesFavoritas.indexOf(ciudad);
+  if (index === -1) {
+    ciudadesFavoritas.push(ciudad);
+  } else {
+    ciudadesFavoritas.splice(index, 1);
+  }
+  guardarEnLocalStorage();
+  mostrarCiudadesFavoritas();
+
+  const botonFavorito = document.querySelector(".favorite-btn");
+  if (botonFavorito) {
+    botonFavorito.textContent = ciudadesFavoritas.includes(ciudad)
+      ? "★ Favorito"
+      : "☆ Agregar a Favoritos";
+  }
+}
+
+function mostrarBusquedaReciente() {
+  const listaBusqueda = document.getElementById("listaBusqueda");
+  listaBusqueda.innerHTML = "";
+
+  busquedasRecientes.forEach((busqueda) => {
+    let li = document.createElement("li");
+    li.innerHTML = `
+            <span>${busqueda}</span>
+            <button class="favorite-btn" onclick="event.stopPropagation(); toggleFavorito('${busqueda}')">
+                ${ciudadesFavoritas.includes(busqueda) ? "★" : "☆"}
+            </button>
+        `;
+
+    li.onclick = () => {
+      document.getElementById("ubicacion").value = busqueda;
+      verificarClima();
+    };
+
+    listaBusqueda.appendChild(li);
+  });
+}
+
+function mostrarCiudadesFavoritas() {
+  const listaFavoritas = document.getElementById("listaFavoritos");
+  listaFavoritas.innerHTML = "";
+
+  ciudadesFavoritas.forEach((ciudad) => {
+    let li = document.createElement("li");
+    li.innerHTML = `
+            <span>${ciudad}</span>
+            <button class="favorite-btn" onclick="event.stopPropagation(); toggleFavorito('${ciudad}')">★</button>
+        `;
+
+    li.onclick = () => {
+      document.getElementById("ubicacion").value = ciudad;
+      verificarClima();
+    };
+
+    listaFavoritas.appendChild(li);
+  });
+}
+
+
 function cambiarFondo(clima, temp) {
-    let fondo = "";
+  let fondo = "";
 
-    // Si la temperatura es alta, priorizar el fondo de playa
-    if (temp >= 30) {
-        fondo = "assets/diaPlaya.gif"; // GIF de día de playa para calor extremo
-    } else if (clima === "Snow" || temp < 0) {
-        fondo = "assets/nieve.gif"; // GIF de nieve para frío extremo
-    } else {
-        switch (clima) {
-            case "Rain":
-                fondo = "assets/diaLluvioso.gif";
-                break;
-            case "Clear":
-                fondo = "assets/diaSoleado.gif";
-                break;
-            case "Clouds":
-                fondo = "assets/nublado.gif";
-                break;
-            default:
-                fondo = "assets/dInicio.gif"; // Fondo predeterminado
-                break;
-        }
+  if (temp >= 30) {
+    fondo = "assets/diaPlaya.gif"; 
+  } else if (clima === "Snow" || temp < 0) {
+    fondo = "assets/nieve.gif"; 
+  } else {
+    switch (clima) {
+      case "Rain":
+        fondo = "assets/diaLluvioso.gif";
+        break;
+      case "Clear":
+        fondo = "assets/diaSoleado.gif";
+        break;
+      case "Clouds":
+        fondo = "assets/nublado.gif";
+        break;
+      default:
+        fondo = "assets/dInicio.gif"; 
+        break;
     }
+  }
 
-    if (fondo) {
-        document.body.style.backgroundImage = `url('${fondo}')`;
-        document.body.style.backgroundSize = "cover";
-        document.body.style.backgroundPosition = "center";
-        document.body.style.backgroundRepeat = "no-repeat";
-    }
+  if (fondo) {
+    document.body.style.backgroundImage = `url('${fondo}')`;
+    document.body.style.backgroundSize = "cover";
+    document.body.style.backgroundPosition = "center";
+    document.body.style.backgroundRepeat = "no-repeat";
+  }
 }
 
 function mostrarPronostico(lista) {
-    const tabla = document.querySelector("#tablaClima tbody");
-    tabla.innerHTML = "";
+  const tabla = document.querySelector("#tablaClima tbody");
+  tabla.innerHTML = "";
 
-    lista.slice(0, 8).forEach(hora => {
-        let icono = `https://openweathermap.org/img/wn/${hora.weather[0].icon}.png`;
-        let fila = `
+  lista.slice(0, 8).forEach((hora) => {
+    let icono = `https://openweathermap.org/img/wn/${hora.weather[0].icon}.png`;
+    let fila = `
             <tr>
                 <td>${new Date(hora.dt * 1000).toLocaleTimeString()}</td>
-                <td><img src="${icono}" alt="${hora.weather[0].description}"> ${hora.weather[0].description}</td>
+                <td><img src="${icono}" alt="${hora.weather[0].description}"> ${
+      hora.weather[0].description
+    }</td>
                 <td>${hora.main.temp}°C</td>
                 <td>${hora.main.feels_like}°C</td>
                 <td>${hora.main.humidity}%</td>
                 <td>${hora.wind.speed} m/s</td>
             </tr>`;
-        tabla.innerHTML += fila;
-    });
+    tabla.innerHTML += fila;
+  });
 }
 
-// ✅ Se agregó la función que faltaba para mostrar el pronóstico a largo plazo
+
 function mostrarPronosticoLargoPlazo(lista) {
-    const tablaLargoPlazo = document.querySelector("#tablaPronosticoLargoPlazo tbody");
-    tablaLargoPlazo.innerHTML = "";
-    const diasDisponibles = Math.min(7, Math.floor(lista.length / 8));
+  const tablaLargoPlazo = document.querySelector(
+    "#tablaPronosticoLargoPlazo tbody"
+  );
+  tablaLargoPlazo.innerHTML = "";
+  const diasDisponibles = Math.min(7, Math.floor(lista.length / 8));
 
-    for (let i = 0; i < diasDisponibles; i++) {
-        let dia = lista[i * 8];
-        if (!dia) continue;
+  for (let i = 0; i < diasDisponibles; i++) {
+    let dia = lista[i * 8];
+    if (!dia) continue;
 
-        let fecha = new Date(dia.dt * 1000).toLocaleDateString();
-        let icono = `https://openweathermap.org/img/wn/${dia.weather[0].icon}.png`;
+    let fecha = new Date(dia.dt * 1000).toLocaleDateString();
+    let icono = `https://openweathermap.org/img/wn/${dia.weather[0].icon}.png`;
 
-        let fila = `
+    let fila = `
             <tr>
                 <td>${fecha}</td>
                 <td><img src="${icono}" alt="${dia.weather[0].description}"> ${dia.weather[0].description}</td>
                 <td>${dia.main.temp_max}°C</td>
                 <td>${dia.main.temp_min}°C</td>
             </tr>`;
-        tablaLargoPlazo.innerHTML += fila;
-    }
+    tablaLargoPlazo.innerHTML += fila;
+  }
 }
 
-// Mostrar las últimas 5 búsquedas
-function mostrarBusquedaReciente() {
-    const listaBusqueda = document.getElementById("listaBusqueda");
-    listaBusqueda.innerHTML = "";
-
-    busquedasRecientes.forEach(busqueda => {
-        let li = document.createElement("li");
-        li.textContent = busqueda;
-        listaBusqueda.appendChild(li);
-    });
-}
-
-// 🔥 Función de recomendaciones de ropa según la temperatura
 function recomendacionesRopa(temp) {
-    let mensaje = "";
+  let mensaje = "";
 
-    if (temp >= 30) {
-        mensaje = "Hace mucho calor 🌞. Usa ropa ligera, gafas de sol y mantente hidratado.";
-    } else if (temp >= 20) {
-        mensaje = "Clima templado ☀️. Puedes usar ropa cómoda como una camiseta y jeans.";
-    } else if (temp >= 10) {
-        mensaje = "Hace un poco de frío 🍂. Se recomienda usar una chaqueta ligera.";
-    } else if (temp >= 0) {
-        mensaje = "Hace frío ❄️. Usa abrigo, bufanda y guantes.";
-    } else {
-        mensaje = "Mucho frío 🥶. Necesitas abrigo grueso, gorro y guantes.";
-    }
+  if (temp >= 30) {
+    mensaje =
+      "Hace mucho calor 🌞. Usa ropa ligera, gafas de sol y mantente hidratado.";
+  } else if (temp >= 20) {
+    mensaje =
+      "Clima templado ☀️. Puedes usar ropa cómoda como una camiseta y jeans.";
+  } else if (temp >= 10) {
+    mensaje =
+      "Hace un poco de frío 🍂. Se recomienda usar una chaqueta ligera.";
+  } else if (temp >= 0) {
+    mensaje = "Hace frío ❄️. Usa abrigo, bufanda y guantes.";
+  } else {
+    mensaje = "Mucho frío 🥶. Necesitas abrigo grueso, gorro y guantes.";
+  }
 
-    document.getElementById("ropaRecomendada").textContent = mensaje;
+  document.getElementById("ropaRecomendada").textContent = mensaje;
 }
 
-// 🔥 Función para limpiar la información de la tabla y ubicación
 function limpiarInformacion() {
-    document.querySelector("#tablaClima tbody").innerHTML = "";
-    document.querySelector("#tablaPronosticoLargoPlazo tbody").innerHTML = "";
-    document.getElementById("ubicacionActual").textContent = "Ubicación Actual: --";
-    document.getElementById("ropaRecomendada").textContent = "Por favor, ingresa una ubicación para ver las recomendaciones de ropa.";
+  document.querySelector("#tablaClima tbody").innerHTML = "";
+  document.querySelector("#tablaPronosticoLargoPlazo tbody").innerHTML = "";
+  document.getElementById("ubicacionActual").textContent =
+    "Ubicación Actual: --";
+  document.getElementById("ropaRecomendada").textContent =
+    "Por favor, ingresa una ubicación para ver las recomendaciones de ropa.";
 }
 
 function regresar() {
-    limpiarInformacion();
-    document.getElementById("ubicacion").value = "";
-}
-
-
-let ciudadesFavoritas = [];
-
-// Función para agregar una ciudad a la lista de favoritas
-function agregarCiudadFavorita(ciudad) {
-    if (!ciudadesFavoritas.includes(ciudad)) {
-        ciudadesFavoritas.push(ciudad);
-        mostrarCiudadesFavoritas();
-    } else {
-        alert("Esta ciudad ya está en tu lista de favoritas.");
-    }
-}
-
-// Función para mostrar las ciudades favoritas
-function mostrarCiudadesFavoritas() {
-    const listaFavoritas = document.getElementById("listaFavoritos");
-    listaFavoritas.innerHTML = "";
-
-    ciudadesFavoritas.forEach(ciudad => {
-        let li = document.createElement("li");
-        li.textContent = ciudad;
-
-        // Botón para eliminar la ciudad de favoritas
-        let botonEliminar = document.createElement("button");
-        botonEliminar.textContent = "Eliminar";
-        botonEliminar.onclick = () => eliminarCiudadFavorita(ciudad);
-
-        li.appendChild(botonEliminar);
-        listaFavoritas.appendChild(li);
-    });
-}
-
-// Función para eliminar una ciudad de la lista de favoritas
-function eliminarCiudadFavorita(ciudad) {
-    ciudadesFavoritas = ciudadesFavoritas.filter(fav => fav !== ciudad);
-    mostrarCiudadesFavoritas();
-}
-
-// Modificar la función obtenerDatos para incluir el botón de agregar a favoritas
-async function obtenerDatos(url) {
-    try {
-        const response = await fetch(url);
-        if (!response.ok) {
-            throw new Error(`HTTP Error: ${response.status} ${response.statusText}`);
-        }
-        const data = await response.json();
-
-        if (data.cod !== "200") {
-            alert("Ubicación no encontrada. Intenta otra ciudad.");
-            return;
-        }
-
-        mostrarPronostico(data.list);
-        mostrarPronosticoLargoPlazo(data.list);
-
-        recomendacionesRopa(data.list[0].main.temp);
-        cambiarFondo(data.list[0].weather[0].main, data.list[0].main.temp);
-
-        if (busquedasRecientes.length >= 5) {
-            busquedasRecientes.pop();
-        }
-        busquedasRecientes.unshift(data.city.name);
-        mostrarBusquedaReciente();
-
-        if (data.city && data.city.country) {
-            document.getElementById("ubicacionActual").textContent = `${data.city.name}, ${data.city.country}`;
-        }
-
-        // Agregar botón para añadir a favoritas
-        const botonFavorito = document.createElement("button");
-        botonFavorito.textContent = "Agregar a Favoritas";
-        botonFavorito.onclick = () => agregarCiudadFavorita(data.city.name);
-        document.getElementById("ubicacionActual").appendChild(botonFavorito);
-
-    } catch (error) {
-        console.error("Error al obtener los datos: ", error);
-        alert("Error al obtener datos. Revisa tu conexión.");
-    }
-}
-
-// Mostrar las últimas 5 búsquedas
-function mostrarBusquedaReciente() {
-    const listaBusqueda = document.getElementById("listaBusqueda");
-    listaBusqueda.innerHTML = "";
-
-    busquedasRecientes.forEach(busqueda => {
-        let li = document.createElement("li");
-        li.textContent = busqueda;
-
-        // Hacer el elemento pulsable
-        li.style.cursor = "pointer";
-        li.onclick = () => {
-            document.getElementById("ubicacion").value = busqueda; // Establecer la ubicación seleccionada
-            verificarClima(); // Realizar la búsqueda
-        };
-
-        listaBusqueda.appendChild(li);
-    });
-}
-
-// Función para mostrar las ciudades favoritas
-function mostrarCiudadesFavoritas() {
-    const listaFavoritas = document.getElementById("listaFavoritos");
-    listaFavoritas.innerHTML = "";
-
-    ciudadesFavoritas.forEach(ciudad => {
-        let li = document.createElement("li");
-        li.textContent = ciudad;
-
-        // Hacer el elemento pulsable
-        li.style.cursor = "pointer";
-        li.onclick = () => {
-            document.getElementById("ubicacion").value = ciudad; // Establecer la ubicación seleccionada
-            verificarClima(); // Realizar la búsqueda
-        };
-
-        // Botón para eliminar la ciudad de favoritas
-        let botonEliminar = document.createElement("button");
-        botonEliminar.textContent = "Eliminar";
-        botonEliminar.onclick = (event) => {
-            event.stopPropagation(); // Evitar que el clic en el botón dispare la búsqueda
-            eliminarCiudadFavorita(ciudad);
-        };
-
-        li.appendChild(botonEliminar);
-        listaFavoritas.appendChild(li);
-    });
+  limpiarInformacion();
+  document.getElementById("ubicacion").value = "";
 }
